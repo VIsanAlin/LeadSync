@@ -137,6 +137,30 @@ const DashboardPage = () => {
       setCheckedProjects([...checkedProjects, formId]);
     }
   };
+  const handleUnasignedChange = async () => {
+    setShowUnassignedOnly(!showUnassignedOnly); // Toggle the state
+
+    try {
+      let { data, error } = await supabase
+        .from("projects")
+        .select()
+        .is("assigned_to", null); // Fetch projects where assigned_to is null
+
+      if (error) {
+        throw error;
+      }
+
+      if (!showUnassignedOnly) {
+        // If checkbox is checked, filter unassigned projects
+        setFormsList(data || []);
+      } else {
+        // If checkbox is unchecked, fetch all projects
+        fetchForms();
+      }
+    } catch (error: any) {
+      console.error("Error fetching unassigned projects:", error.message);
+    }
+  };
 
   const handleFormClick = (id: string) => {
     setLeadID(id); // Set the clicked form ID to the state variable
@@ -150,12 +174,15 @@ const DashboardPage = () => {
     const userId = e.target.value;
     const selected = usersRole.find((user) => user.email === userId);
     if (selected) {
-      console.log(selected);
-      console.log(userId);
       setAssignPersonId(selected.user_id); // Save only the user_id into assignPersonId
     } else {
       console.error("User not found");
     }
+  };
+  const getUserEmailById = (userId: string) => {
+    const user = usersRole.find((user) => user.user_id === userId);
+    // Return the user's email if found, otherwise return an empty string
+    return user ? user.email : "";
   };
 
   const handleFilterStatusChange = (status: string | null) => {
@@ -215,6 +242,16 @@ const DashboardPage = () => {
     }
   };
 
+  const getStatusCircleSizeClass = (status: string) => {
+    if (status.length <= 4) {
+      return "h-8 w-12";
+    } else if (status.length <= 8) {
+      return "h-6 w-20";
+    } else {
+      return "h-8 w-36";
+    }
+  };
+
   const filteredForms = formsList.filter((form) => {
     if (statusFilter) {
       return form.status === statusFilter;
@@ -222,20 +259,16 @@ const DashboardPage = () => {
     return true;
   });
 
-  //JSX Dropdown
-  // JSX for the dropdown with status options
-  const statusOptions = [
-    ...statuses.map((status, index) => (
-      <option key={index} value={status}>
-        {status}
-      </option>
-    )),
-  ];
+  const statusOptions = statuses.map((status, index) => (
+    <option key={index} value={status}>
+      {status}
+    </option>
+  ));
 
   // JSX for the "Add" button
   const addButton = (
     <button
-      className="ml-3 bg-forthColor text-eightColor hover:text-forthColor hover:bg-eightColor py-2 px-4 rounded"
+      className="ml-3 bg-forthColor text-white hover:bg-eightColor hover:text-forthColor py-2 px-4 rounded border-none transition-colors"
       onClick={() => setShowAddProject(true)} // Toggle the modal display
     >
       Add Project
@@ -249,28 +282,26 @@ const DashboardPage = () => {
         type="checkbox"
         className="form-checkbox h-5 w-5 text-blue-600"
         checked={showUnassignedOnly}
-        onChange={handleCheckboxChange}
+        onChange={handleUnasignedChange}
       />
       <span className="ml-2 text-gray-700">Unassigned Only</span>
     </label>
   );
 
   // Render Users dropdown
-  const renderUsersDropdown = () => {
-    return (
-      <select
-        className="text-forthColor w-auto"
-        onChange={handleAssignPersonChange}
-      >
-        <option value="">Select User</option>
-        {usersRole.map((user) => (
-          <option key={user.id} value={user.id}>
-            {user.email}
-          </option>
-        ))}
-      </select>
-    );
-  };
+  const renderUsersDropdown = () => (
+    <select
+      className="text-forthColor w-auto bg-transparent border-b border-forthColor focus:outline-none focus:border-eightColor"
+      onChange={handleAssignPersonChange}
+    >
+      <option value="">Select User</option>
+      {usersRole.map((user) => (
+        <option key={user.id} value={user.id}>
+          {user.email}
+        </option>
+      ))}
+    </select>
+  );
 
   // Calculate the index of the first and last forms to display on the current page
   const indexOfLastForm = currentPage * formsPerPage;
@@ -289,34 +320,37 @@ const DashboardPage = () => {
         <div className="mb-5 flex ">
           <div className="bg-firstColor p-5 rounded-md shadow-md shadow-forthColor mr-5">
             <h2 className="text-lg font-semibold">Active Forms</h2>
-            <p className="text-2xl font-bold">{activeForms}</p>
+            <p className="text-2xl font-bold text-center">{activeForms}</p>
           </div>
           <div className="bg-firstColor p-5 rounded-md shadow-md shadow-forthColor">
-            <h2 className="text-lg font-semibold">Tasks</h2>
-            <p className="text-2xl font-bold">{activeTasks}</p>
+            <h2 className="text-lg font-semibold">Active Tasks</h2>
+            <p className="text-2xl font-bold text-center">{activeTasks}</p>
           </div>
         </div>
-        <div className="mb-5">
-          {/* Filters */}
-          <div className="flex flex-col justify-between mb-3">
-            <div className="flex p-3 items-center">
-              <div className="bg-forthColor  rounded-md shadow-md mr-3 relative ">
-                <select
-                  className="outline-none border-none bg-forthColor text-white py-2 px-4 pr-8 rounded-md appearance-none"
-                  onChange={(e) => {
-                    handleFilterStatusChange(e.target.value);
-                    filterProjects(e.target.value); // Filter projects based on selected status
-                  }}
-                >
-                  <option value="">All</option>
-                  {statusOptions}
-                </select>
-              </div>
-              {addButton}
-            </div>
-            {unassignedCheckbox}
+        {/* Filters and Action Buttons */}
+        <div className="flex flex-col lg:flex-row justify-between items-start p-3 mb-5 mr-5">
+          <div className="flex flex-row items-center">
+            <select
+              className="outline-none border-none bg-forthColor text-white py-2 px-4 pr-8 rounded-md appearance-none mr-3"
+              onChange={(e) => {
+                handleFilterStatusChange(e.target.value);
+                filterProjects(e.target.value); // Filter projects based on selected status
+              }}
+            >
+              <option value="">All</option>
+              {statusOptions}
+            </select>
+            {addButton}
+          </div>
+          <div>{unassignedCheckbox}</div>
+          <div>
             {renderUsersDropdown()}
-            <button onClick={handleAssignPerson}>Assign User</button>
+            <button
+              className="ml-3 bg-forthColor text-white hover:bg-eightColor hover:text-forthColor py-2 px-4 rounded border-none transition-colors"
+              onClick={handleAssignPerson}
+            >
+              Assign User
+            </button>
           </div>
         </div>
         {/* Project list */}
@@ -326,32 +360,39 @@ const DashboardPage = () => {
             {currentForms.map((form) => (
               <li
                 key={form.id}
-                className="rounded-lg shadow-md shadow-forthColor p-4"
+                className="flex items-center rounded-lg shadow-md shadow-forthColor p-4 mb-4 cursor-pointer"
                 onClick={() => handleFormClick(form.id)}
               >
+                {/* Checkbox */}
+                <input
+                  type="checkbox"
+                  className="mr-3"
+                  checked={checkedProjects.includes(form.id)}
+                  onChange={() => handleCheckboxChange(form.id)}
+                />
+                {/* Information */}
                 <Link href={`/dashboard/${form.id}`}>
-                  <div className="flex justify-between">
+                  <div className="flex items-center">
+                    {/* Status */}
+                    <div
+                      className={`rounded-full mr-3 bg-forthColor flex items-center justify-center ${getStatusCircleSizeClass(
+                        form.status
+                      )}`}
+                    >
+                      <p className="text-white text-sm font-semibold">
+                        {form.status}
+                      </p>
+                    </div>
+                    {/* Name */}
                     <div>
                       <p className="text-lg font-semibold">{form.name}</p>
-                      <p className="text-sm text-gray-300">{form.status}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-300">
-                        Created at: {formatDate(form.created_at)}
-                      </p>
-                      <p className="text-sm text-gray-300">
-                        Assigned to: {form.assigned_to}
+                      {/* Adjusted Assigned To */}
+                      <p className="text-sm text-eightColor">
+                        Assigned to: {getUserEmailById(form.assigned_to)}
                       </p>
                     </div>
                   </div>
                 </Link>
-                {form.assigned_to === null && (
-                  <input
-                    type="checkbox"
-                    checked={checkedProjects.includes(form.id)}
-                    onChange={() => handleCheckboxChange(form.id)}
-                  />
-                )}
               </li>
             ))}
           </ul>
@@ -377,7 +418,7 @@ const DashboardPage = () => {
       </div>
       {showAddProject && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className=" p-6 rounded-md shadow-md">
+          <div className="p-6 rounded-md shadow-md bg-white">
             <button
               className="absolute top-0 right-0 m-4 text-lg text-gray-500"
               onClick={() => setShowAddProject(false)}

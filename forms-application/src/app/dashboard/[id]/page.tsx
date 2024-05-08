@@ -51,6 +51,7 @@ const FormDetailsPage = () => {
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [description, setDescription] = useState("");
 
   useEffect(() => {
     if (id) {
@@ -134,11 +135,33 @@ const FormDetailsPage = () => {
         assigned_to: formDetails?.assigned_to || null,
       });
 
+      await supabase.from("project_notes").insert({
+        project_id: id,
+        title: "Status change",
+        description: "The status has been changed to: STATUS at DATE by USER",
+        created_by: localStorage.getItem("userId"),
+        created_at: new Date(),
+      });
+
       // Close the status modal
       setShowStatusModal(false);
     } catch (error: any) {
       console.error("Error updating status:", error.message);
     }
+  };
+
+  const handleAddNote = async () => {
+    if (!description) return; // Don't add empty notes
+
+    await supabase.from("project_notes").insert({
+      project_id: id,
+      description: description,
+      created_by: localStorage.getItem("userId"),
+      created_at: new Date(),
+    });
+
+    // Clear the description field after adding the note
+    setDescription("");
   };
 
   const calculateEndDate = (status: string): Date => {
@@ -273,9 +296,25 @@ const FormDetailsPage = () => {
             </div>
             {/* Right side: Notes */}
             <div>
-              <div className="bg-forthColor p-4 rounded-md shadow-md">
-                <h2 className="text-lg font-semibold mb-4">Notes</h2>
+              <div className="p-4 rounded-md shadow-xl shadow-forthColor">
+                <h2 className="text-lg font-semibold mb-4 ml-2">Notes</h2>
                 <NotesComponent notes={notes} />
+                <div className="flex p-4 max-h-24">
+                  {/* Input field for description */}
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Enter note description..."
+                    className="w-full p-2  rounded-md shadow-inner shadow-forthColor bg-secondColor text-eightColor mr-4"
+                  />
+                  {/* Button to add new note */}
+                  <button
+                    onClick={handleAddNote}
+                    className="bg-forthColor text-white  px-4 rounded hover:bg-eightColor hover:text-forthColor"
+                  >
+                    Add Note
+                  </button>
+                </div>
               </div>
             </div>
           </div>

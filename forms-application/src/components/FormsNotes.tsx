@@ -33,16 +33,19 @@ const NotesComponent: React.FC<NotesComponentProps> = ({ notes }) => {
   // Check if notes is an array
   if (Array.isArray(notes)) {
     return (
-      <div className="notes-component bg-firstColor shadow-lg text-forthColor p-4">
+      <div className="bg-firstColor shadow-lg text-forthColor p-4">
         <div>
           {notes.map((note) => (
-            <div key={note.id} className="mb-4">
+            <div
+              key={note.id}
+              className="bg-forthColor text-eightColor rounded-xl mb-4 p-4" // Added padding here
+            >
               <div className="flex justify-between items-center mb-2">
                 <div>{note.created_by}</div>
                 <div>{formatDate(note.created_at)}</div>
               </div>
-              <p>{note.title}</p>
-              <p>{note.description}</p>
+              <p className="text-lg">{note.title}</p>
+              <p className="text-sm">{note.description}</p>
             </div>
           ))}
         </div>
@@ -52,8 +55,8 @@ const NotesComponent: React.FC<NotesComponentProps> = ({ notes }) => {
   } else if (notes) {
     // If notes is a single note object
     return (
-      <div className="notes-component bg-firstColor shadow-lg text-forthColor p-4">
-        <div className="mb-4">
+      <div className=" bg-firstColor shadow-lg text-forthColor p-4">
+        <div className="bg-forthColor text-eightColor rounded-xl mb-4 p-4">
           <div className="flex justify-between items-center mb-2">
             <div>{notes.created_by}</div>
             <div>{formatDate(notes.created_at)}</div>
