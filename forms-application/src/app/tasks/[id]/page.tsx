@@ -98,7 +98,7 @@ const TaskPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col min-h-screen md:flex-row">
       <Navbar />
       <div className="flex-1 p-5 bg-firstColor">
         <div className="container mx-auto p-6 bg-firstColor shadow-md rounded-md">

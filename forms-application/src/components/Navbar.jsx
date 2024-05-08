@@ -7,10 +7,12 @@ import {
   FiBell,
   FiUser,
   FiLogOut,
+  FiMenu,
 } from "react-icons/fi"; // Import icons from react-icons library
 
 export default function Navbar() {
   const [notificationCount, setNotificationCount] = useState(0);
+  const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
     fetchNotificationCount();
@@ -45,9 +47,9 @@ export default function Navbar() {
 
   return (
     <nav className="bg-thirdColor sticky top-0 z-10 rounded-tr-2xl rounded-br-2xl">
-      <div className="flex justify-between py-2 lg:px-20 px-6">
-        <div className="flex flex-col pt-20 space-y-10">
-          <div className="hidden md:flex space-x-4 pt-4 items-center">
+      <div className="flex justify-between py-2  px-6">
+        <div className="hidden md:flex flex-col md:pt-20 md:space-y-10">
+          <div className="flex space-x-4 pt-4 items-center">
             <Link
               href="/dashboard"
               className="flex items-center text-eightColor"
@@ -56,33 +58,33 @@ export default function Navbar() {
               <span className="ml-2">Dashboard</span>
             </Link>
           </div>
-          <div className="hidden md:flex space-x-4 pt-4 items-center">
+          <div className="flex space-x-4 pt-4 items-center">
             <Link href="/tasks" className="flex items-center text-eightColor">
               <FiCheckSquare />
               <span className="ml-2">Tasks</span>
             </Link>
           </div>
-          <div className="hidden md:flex space-x-4 pt-4 items-center">
+          <div className="flex space-x-4 pt-4 items-center">
             <Link
               href="/notifications"
               className="flex items-center text-eightColor"
             >
               <FiBell />
               <span className="ml-2">Notifications</span>
+              {notificationCount > 0 && (
+                <span className="bg-eightColor text-forthColor rounded-full px-2 py-1 ml-2">
+                  {notificationCount}
+                </span>
+              )}
             </Link>
-            {notificationCount > 0 && (
-              <span className="bg-eightColor text-forthColor rounded-full px-2 py-1">
-                {notificationCount}
-              </span>
-            )}
           </div>
-          <div className="hidden md:flex space-x-4 pt-4 items-center">
+          <div className="flex space-x-4 pt-4 items-center">
             <Link href="/profile" className="flex items-center text-eightColor">
               <FiUser />
               <span className="ml-2">Profile</span>
             </Link>
           </div>
-          <div className="hidden md:flex space-x-4 pt-4 items-center">
+          <div className="flex space-x-4 pt-4 items-center">
             <Link
               onClick={handleLogout}
               href="/"
@@ -92,6 +94,36 @@ export default function Navbar() {
               <span className="ml-2">Log-out</span>
             </Link>
           </div>
+        </div>
+        {/* Burger menu for mobile */}
+        <div className="md:hidden">
+          <button onClick={() => setShowMenu(!showMenu)}>
+            <FiMenu />
+          </button>
+          {showMenu && (
+            <div className="flex flex-col space-y-4">
+              <Link href="/dashboard" className="text-eightColor">
+                Dashboard
+              </Link>
+              <Link href="/tasks" className="text-eightColor">
+                Tasks
+              </Link>
+              <Link href="/notifications" className="text-eightColor">
+                Notifications
+                {notificationCount > 0 && (
+                  <span className="bg-eightColor text-forthColor rounded-full px-2 py-1 ml-2">
+                    {notificationCount}
+                  </span>
+                )}
+              </Link>
+              <Link href="/profile" className="text-eightColor">
+                Profile
+              </Link>
+              <Link onClick={handleLogout} href="/" className="text-eightColor">
+                Log-out
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </nav>

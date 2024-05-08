@@ -31,14 +31,15 @@ const TasksList: React.FC<TasksListProps> = ({ tasks }) => {
   };
 
   // Check if tasks is an array
+  // Check if tasks is an array
   if (Array.isArray(tasks)) {
     return (
-      <div className="tasks-list bg-forthColor p-4 rounded-md shadow-md">
-        <div className="space-y-4">
+      <div className="bg-firstColor shadow-lg text-forthColor p-4">
+        <div>
           {tasks.map((task) => (
             <div
               key={task.id}
-              className="bg-forthColor p-4 rounded-md shadow-md"
+              className="bg-secondColor text-eightColor rounded-xl mb-4 p-4 shadow-md"
             >
               <h3 className="text-lg font-semibold">{task.name}</h3>
               <p className="text-eightColor">{task.description}</p>
@@ -78,19 +79,22 @@ const TasksList: React.FC<TasksListProps> = ({ tasks }) => {
   } else if (tasks) {
     // If tasks is a single task object
     return (
-      <div className="tasks-list bg-forthColor p-4 rounded-md shadow-md">
+      <div className="bg-firstColor shadow-lg text-forthColor p-4">
         <h2 className="text-lg font-semibold mb-4">Tasks</h2>
-        <div className="space-y-4">
-          <div key={tasks.id}>
+        <div className="bg-secondColor shadow-lg text-thirdColor p-4">
+          <div
+            className="bg-thirdColor text-secondColor rounded-xl mb-4 p-4"
+            key={tasks.id}
+          >
             <h3 className="text-lg font-semibold">{tasks.name}</h3>
-            <p className="text-eightColor">{tasks.description}</p>
-            <p className="text-eightColor">
+            <p className="text-thirdColor">{tasks.description}</p>
+            <p className="text-thirdColor">
               <strong>Due Date:</strong>{" "}
               {tasks.due_date
                 ? new Date(tasks.due_date).toLocaleDateString()
                 : "N/A"}
             </p>
-            <p className="text-eightColor">
+            <p className="text-thirdColor">
               <strong>Status:</strong> {tasks.status}
             </p>
             {/* WhatsApp and Copy buttons with icons */}
@@ -118,7 +122,7 @@ const TasksList: React.FC<TasksListProps> = ({ tasks }) => {
     );
   } else {
     return (
-      <div className="tasks-list bg-forthColor p-4 rounded-md shadow-md">
+      <div className="bg-firstColor shadow-lg text-forthColor p-4">
         No tasks available
       </div>
     ); // Handle case where tasks is null or undefined

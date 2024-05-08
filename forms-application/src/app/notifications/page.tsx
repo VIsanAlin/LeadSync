@@ -98,7 +98,7 @@ const NotificationPage = () => {
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col min-h-screen md:flex-row">
       <Navbar />
       <div className="flex-1 p-5 bg-firstColor text-eightColor">
         <div className="mb-5">
@@ -141,19 +141,20 @@ const NotificationPage = () => {
             {currentNotifications.map((notification) => (
               <li
                 key={notification.id}
-                className="rounded-lg shadow-md shadow-forthColor p-4"
+                className="flex items-center rounded-lg shadow-md shadow-forthColor p-4 mb-4 cursor-pointer"
               >
-                <div className="flex justify-between">
-                  <div>
+                {/* Information */}
+                <div className="flex items-center">
+                  {/* Title */}
+                  <div className="mr-3">
                     <p className="text-lg font-semibold">
                       {notification.title}
                     </p>
-                    <p className="text-sm text-gray-300">
-                      {notification.description}
-                    </p>
+                    <p className="text-sm ">{notification.description}</p>
                   </div>
+                  {/* End Date */}
                   <div>
-                    <p className="text-sm text-gray-300">
+                    <p className="text-sm ">
                       End Date: {formatDate(notification.end_date)}
                     </p>
                   </div>

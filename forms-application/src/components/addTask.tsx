@@ -1,16 +1,35 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/utils/supabase";
 
 interface AddTaskPageProps {
   leadID: string;
+  onClose: () => void;
 }
 
-const AddTaskPage = ({ leadID }: AddTaskPageProps) => {
+const AddTaskPage = ({ leadID, onClose }: AddTaskPageProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [status, setStatus] = useState("");
   const [assignedTo, setAssignedTo] = useState(""); // Assuming this is a user ID or name
+
+  const formRef = useRef(null);
+  useEffect(() => {
+    // Function to close the modal when clicking outside the form
+    const handleOutsideClick = (event: any) => {
+      if (formRef.current && !formRef.current.contains(event.target)) {
+        onClose(); // Close the modal
+      }
+    };
+
+    // Add event listener when the component mounts
+    document.addEventListener("mousedown", handleOutsideClick);
+
+    // Cleanup function to remove event listener when component unmounts
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -35,7 +54,7 @@ const AddTaskPage = ({ leadID }: AddTaskPageProps) => {
   };
 
   return (
-    <div className="bg-firstColor p-6 rounded-md shadow-md">
+    <div ref={formRef} className="bg-firstColor p-6 rounded-md shadow-md">
       <h1 className="text-2xl font-bold mb-4 text-eightColor">Add Task</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

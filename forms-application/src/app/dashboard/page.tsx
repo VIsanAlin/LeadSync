@@ -268,16 +268,20 @@ const DashboardPage = () => {
   // JSX for the "Add" button
   const addButton = (
     <button
-      className="ml-3 bg-forthColor text-white hover:bg-eightColor hover:text-forthColor py-2 px-4 rounded border-none transition-colors"
+      className="text-xs ml-3 bg-forthColor text-white hover:bg-eightColor hover:text-forthColor py-2 px-4 rounded border-none transition-colors "
       onClick={() => setShowAddProject(true)} // Toggle the modal display
+      style={{ height: "2.5rem" }} // Set height to match dropdown
     >
-      Add Project
+      Add Lead
     </button>
   );
 
   // JSX for the checkbox to filter unassigned projects
   const unassignedCheckbox = (
-    <label className="inline-flex items-center ml-3">
+    <label
+      className="inline-flex items-center ml-3"
+      style={{ height: "2.5rem" }}
+    >
       <input
         type="checkbox"
         className="form-checkbox h-5 w-5 text-blue-600"
@@ -291,8 +295,9 @@ const DashboardPage = () => {
   // Render Users dropdown
   const renderUsersDropdown = () => (
     <select
-      className="text-forthColor w-auto bg-transparent border-b border-forthColor focus:outline-none focus:border-eightColor"
+      className="outline-none border-none bg-forthColor text-white py-2 px-4 pr-8 rounded-md appearance-none mb-3"
       onChange={handleAssignPersonChange}
+      style={{ height: "2.5rem" }} // Set height to match dropdown
     >
       <option value="">Select User</option>
       {usersRole.map((user) => (
@@ -300,6 +305,21 @@ const DashboardPage = () => {
           {user.email}
         </option>
       ))}
+    </select>
+  );
+
+  // JSX for the status dropdown
+  const statusDropdown = (
+    <select
+      className="outline-none border-none bg-forthColor text-white py-2 px-4 pr-8 rounded-md appearance-none mb-3"
+      onChange={(e) => {
+        handleFilterStatusChange(e.target.value);
+        filterProjects(e.target.value); // Filter projects based on selected status
+      }}
+      style={{ height: "2.5rem" }} // Set height to match other dropdowns
+    >
+      <option value="">All</option>
+      {statusOptions}
     </select>
   );
 
@@ -314,45 +334,43 @@ const DashboardPage = () => {
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col min-h-screen md:flex-row">
       <Navbar />
-      <div className="flex-1 p-5 bg-firstColor text-eightColor">
+      <div className="flex-1 p-4 bg-firstColor text-eightColor">
         <div className="mb-5 flex ">
-          <div className="bg-firstColor p-5 rounded-md shadow-md shadow-forthColor mr-5">
+          <div className="bg-firstColor p-2 rounded-md shadow-md shadow-forthColor mr-5">
             <h2 className="text-lg font-semibold">Active Forms</h2>
             <p className="text-2xl font-bold text-center">{activeForms}</p>
           </div>
-          <div className="bg-firstColor p-5 rounded-md shadow-md shadow-forthColor">
+          <div className="bg-firstColor p-2 rounded-md shadow-md shadow-forthColor">
             <h2 className="text-lg font-semibold">Active Tasks</h2>
             <p className="text-2xl font-bold text-center">{activeTasks}</p>
           </div>
         </div>
         {/* Filters and Action Buttons */}
-        <div className="flex flex-col lg:flex-row justify-between items-start p-3 mb-5 mr-5">
-          <div className="flex flex-row items-center">
-            <select
-              className="outline-none border-none bg-forthColor text-white py-2 px-4 pr-8 rounded-md appearance-none mr-3"
-              onChange={(e) => {
-                handleFilterStatusChange(e.target.value);
-                filterProjects(e.target.value); // Filter projects based on selected status
-              }}
-            >
-              <option value="">All</option>
-              {statusOptions}
-            </select>
-            {addButton}
+        <div className="flex flex-col justify-between items-start  mb-5 mr-5">
+          <div className="flex flex-col space-y-4">
+            <div className="flex flex-row">
+              {statusDropdown}
+              {addButton}
+            </div>
+
+            <div className="flex flex-col">
+              <div className="flex items-center">
+                {renderUsersDropdown()}
+                <button
+                  className="text-xs bg-forthColor text-white hover:bg-eightColor hover:text-forthColor py-2 px-4  mb-3 ml-3 rounded border-none transition-colors"
+                  onClick={handleAssignPerson}
+                  style={{ height: "2.5rem" }} // Set height to match other buttons
+                >
+                  Assign User
+                </button>
+              </div>
+            </div>
           </div>
-          <div>{unassignedCheckbox}</div>
-          <div>
-            {renderUsersDropdown()}
-            <button
-              className="ml-3 bg-forthColor text-white hover:bg-eightColor hover:text-forthColor py-2 px-4 rounded border-none transition-colors"
-              onClick={handleAssignPerson}
-            >
-              Assign User
-            </button>
-          </div>
+          <div className="py-4">{unassignedCheckbox}</div>
         </div>
+
         {/* Project list */}
         <div>
           <h2 className="text-lg font-semibold mb-3">Projects</h2>
@@ -418,7 +436,7 @@ const DashboardPage = () => {
       </div>
       {showAddProject && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="p-6 rounded-md shadow-md bg-white">
+          <div className="md:w-1/2 lg:w-1/3 xl:w-1/4  rounded-md shadow-md shadow-white">
             <button
               className="absolute top-0 right-0 m-4 text-lg text-gray-500"
               onClick={() => setShowAddProject(false)}

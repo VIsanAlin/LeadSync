@@ -1,4 +1,6 @@
 import React from "react";
+import { supabase } from "@/utils/supabase";
+import { useState, useEffect } from "react";
 
 interface Note {
   id: string;
@@ -7,7 +9,13 @@ interface Note {
   created_by: string;
   created_at: Date;
 }
-
+interface User {
+  id: string;
+  role: string;
+  name: string;
+  phone: string;
+  email: string;
+}
 interface NotesComponentProps {
   notes: Note[] | Note; // Accept either an array of notes or a single note
 }
@@ -30,6 +38,34 @@ const formatDate = (date: Date): string => {
 };
 
 const NotesComponent: React.FC<NotesComponentProps> = ({ notes }) => {
+  const [usersRole, setUsersRole] = useState<User[]>([]);
+
+  useEffect(() => {
+    fetchUserRole();
+  }, [notes]);
+  const fetchUserRole = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_roles_view")
+        .select("*");
+
+      if (error) {
+        throw error;
+      }
+
+      setUsersRole(data || []);
+      console.log(data);
+    } catch (error: any) {
+      console.error("Error fetching users with role 3:", error.message);
+    }
+  };
+  const getUserEmailById = (userId: string) => {
+    const user = usersRole.find((user) => user.user_id === userId);
+    console.log(user);
+    console.log(usersRole);
+    // Return the user's email if found, otherwise return an empty string
+    return user ? user.email : "";
+  };
   // Check if notes is an array
   if (Array.isArray(notes)) {
     return (
@@ -41,7 +77,7 @@ const NotesComponent: React.FC<NotesComponentProps> = ({ notes }) => {
               className="bg-forthColor text-eightColor rounded-xl mb-4 p-4" // Added padding here
             >
               <div className="flex justify-between items-center mb-2">
-                <div>{note.created_by}</div>
+                <div>{getUserEmailById(note.created_by)}</div>
                 <div>{formatDate(note.created_at)}</div>
               </div>
               <p className="text-lg">{note.title}</p>

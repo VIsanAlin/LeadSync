@@ -65,6 +65,16 @@ const TasksPage = () => {
     setFilter(filter);
   };
 
+  const getStatusCircleSizeClass = (status: string) => {
+    if (status.length <= 4) {
+      return "h-8 w-12";
+    } else if (status.length <= 8) {
+      return "h-6 w-20";
+    } else {
+      return "h-8 w-36";
+    }
+  };
+
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   const formatDate = (date: any) => {
@@ -81,7 +91,7 @@ const TasksPage = () => {
   const currentTasks = filteredTasks.slice(indexOfFirstTask, indexOfLastTask);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col min-h-screen md:flex-row">
       <Navbar />
       <div className="flex-1 p-5 bg-firstColor text-eightColor">
         <div className="mb-5">
@@ -124,21 +134,40 @@ const TasksPage = () => {
             {currentTasks.map((task) => (
               <li
                 key={task.id}
-                className="tasks-list bg-forthColor p-4 rounded-md shadow-md"
+                className="shadow-md shadow-forthColor p-4 mb-4 text-eightColor flex flex-col md:flex-row md:items-center"
               >
-                <Link href={`/tasks/${task.id}`}>
-                  <h3 className="text-lg font-semibold">{task.name}</h3>
-                  <p className="text-eightColor">{task.description}</p>
-                  <p className="text-eightColor">
-                    <strong>Due Date:</strong>{" "}
-                    {task.due_date
-                      ? new Date(task.due_date).toLocaleDateString()
-                      : "N/A"}
-                  </p>
-                  <p className="text-eightColor">
-                    <strong>Status:</strong> {task.status}
-                  </p>
-                </Link>
+                <div className="hidden md:flex md:mr-4 ">
+                  <div
+                    className={`rounded-full bg-forthColor flex items-center justify-center ${getStatusCircleSizeClass(
+                      task.status
+                    )}`}
+                  >
+                    <p className="text-white text-sm font-semibold">
+                      {task.status}
+                    </p>
+                  </div>
+                </div>
+                <div className="md:w-3/4">
+                  <Link href={`/tasks/${task.id}`}>
+                    <h3 className="text-lg font-semibold mb-2">{task.name}</h3>
+                    <div
+                      className={` md:hidden rounded-full bg-forthColor flex items-center justify-center mb-2 ${getStatusCircleSizeClass(
+                        task.status
+                      )}`}
+                    >
+                      <p className="text-white text-sm font-semibold">
+                        {task.status}
+                      </p>
+                    </div>
+                    <p className="text-eightColor mb-2">
+                      <strong>Due Date:</strong>{" "}
+                      {task.due_date
+                        ? new Date(task.due_date).toLocaleDateString()
+                        : "N/A"}
+                    </p>
+                    <p className="text-eightColor">{task.description}</p>
+                  </Link>
+                </div>
               </li>
             ))}
           </ul>

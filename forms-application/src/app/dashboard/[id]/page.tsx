@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
 import TasksList from "../../../components/Tasks";
 import NotesComponent from "../../../components/FormsNotes";
@@ -40,6 +40,13 @@ interface Note {
   created_by: string;
   created_at: Date;
 }
+interface User {
+  id: string;
+  role: string;
+  name: string;
+  phone: string;
+  email: string;
+}
 const FormDetailsPage = () => {
   const path = usePathname();
   const parts = path.split("/");
@@ -52,14 +59,38 @@ const FormDetailsPage = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("");
   const [description, setDescription] = useState("");
+  const [usersRole, setUsersRole] = useState<User[]>([]);
+  const modalRef = useRef(null);
+  let whatsappMessage;
 
   useEffect(() => {
     if (id) {
       fetchFormDetails(id);
       fetchTasks(id);
       fetchNotes(id);
+      fetchUserRole();
     }
   }, [id]);
+
+  useEffect(() => {
+    // Function to close the modal when clicking outside
+    const handleOutsideClick = (event: any) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        setShowStatusModal(false);
+      }
+    };
+
+    // Add event listener when modal is shown
+    if (showStatusModal) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+
+    // Remove event listener when modal is hidden
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [showStatusModal]);
+
   console.log(selectedStatus);
   const fetchFormDetails = async (formId: string) => {
     try {
@@ -102,43 +133,103 @@ const FormDetailsPage = () => {
       console.error("Error fetching notes:", error.message);
     }
   };
+  const fetchUserRole = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_roles_view")
+        .select("*")
+        .eq("role_name", "Member");
+
+      if (error) {
+        throw error;
+      }
+
+      setUsersRole(data || []);
+      console.log(data);
+    } catch (error: any) {
+      console.error("Error fetching users with role 3:", error.message);
+    }
+  };
 
   const handleAddTaskClick = () => {
     setShowAddTaskModal(true);
   };
-
+  const closeAddTaskModal = () => {
+    setShowAddTaskModal(false);
+  };
   const handleStatusClick = async (status: string) => {
     try {
       // Update status in 'projects' table
       await supabase.from("projects").update({ status: status }).eq("id", id);
 
       // Add a new task without specifying the 'id' field
-      const taskEndDate = calculateEndDate(status);
+      let taskDescription = "";
+      let taskEndDate;
 
-      await supabase.from("tasks").insert({
-        name: status,
-        description: "Description of the new task",
-        due_date: new Date(taskEndDate),
-        status: "Nou",
-        created_at: new Date(),
-        project_id: id,
-        assigned_to: formDetails?.assigned_to || null,
-      });
+      switch (status) {
+        case "Does not respond":
+          taskDescription =
+            "Follow up with a friendly reminder via WhatsApp in the next hour. Hey [Lead's Name], just wanted to check in to see if you had any questions or needed further assistance. Let me know if there's anything I can help you with!";
+          taskEndDate = calculateEndDate("Does not respond");
+          whatsappMessage =
+            "Hey [Lead's Name], just wanted to check in to see if you had any questions or needed further assistance. Let me know if there's anything I can help you with!";
+          break;
+        case "Accessing funds":
+          taskDescription =
+            "Provide necessary documentation and information to facilitate accessing funds.Hi [Lead's Name], hope you're doing well! I'm reaching out to provide you with the information you need to access the funds. Please let me know if you have any questions or if there's anything else I can assist you with.";
+          taskEndDate = calculateEndDate("Accessing funds");
+          whatsappMessage =
+            "Hi [Lead's Name], hope you're doing well! I'm reaching out to provide you with the information you need to access the funds. Please let me know if you have any questions or if there's anything else I can assist you with.";
+          break;
+        case "Spam":
+          taskDescription =
+            "Remove this lead from the system to maintain data integrity.";
+          taskEndDate = calculateEndDate("Spam");
+          break;
+        case "Is not interested":
+          taskDescription =
+            "Engage the lead in a conversation to understand their concerns and objections.Hi [Lead's Name], I noticed that you're not interested in our services/products at the moment. I'd love to understand more about your needs and concerns to see if there's anything we can do to assist you better. Could we schedule a quick call to discuss further?";
+          taskEndDate = calculateEndDate("Not interested");
+          whatsappMessage =
+            "Hi [Lead's Name], I noticed that you're not interested in our services/products at the moment. I'd love to understand more about your needs and concerns to see if there's anything we can do to assist you better. Could we schedule a quick call to discuss further?";
+          break;
+        case "Waiting funds":
+          taskDescription =
+            "Check in with the lead to see if they have received the necessary funds.Hello [Lead's Name], just wanted to touch base regarding the funds. Have you received them yet? Please let me know if there's anything I can assist you with!";
+          taskEndDate = calculateEndDate("Waiting funds");
+          whatsappMessage =
+            "Hello [Lead's Name], just wanted to touch base regarding the funds. Have you received them yet? Please let me know if there's anything I can assist you with!";
+          break;
+        default:
+          break;
+      }
+
+      if (taskDescription && taskEndDate) {
+        await supabase.from("tasks").insert({
+          name: status,
+          description: taskDescription,
+          due_date: new Date(taskEndDate),
+          status: "Nou",
+          created_at: new Date(),
+          project_id: id,
+          assigned_to: formDetails?.assigned_to || null,
+        });
+      }
 
       // Add a new notification without specifying the 'id' field
       await supabase.from("notification").insert({
         project_id: id,
         title: status,
-        description: "Description of the notification",
+        description: taskDescription,
         created_at: new Date(),
-        end_date: taskEndDate,
+        end_date: taskEndDate || new Date(), // Use taskEndDate if available
         assigned_to: formDetails?.assigned_to || null,
       });
 
       await supabase.from("project_notes").insert({
         project_id: id,
         title: "Status change",
-        description: "The status has been changed to: STATUS at DATE by USER",
+        description: `SYSTEM: Status change to ${status}`,
         created_by: localStorage.getItem("userId"),
         created_at: new Date(),
       });
@@ -164,6 +255,13 @@ const FormDetailsPage = () => {
     setDescription("");
   };
 
+  const getUserEmailById = (userId: string) => {
+    const user = usersRole.find((user) => user.user_id === userId);
+
+    // Return the user's email if found, otherwise return an empty string
+    return user ? user.email : "";
+  };
+
   const calculateEndDate = (status: string): Date => {
     // Logic to calculate end date based on status
     const currentDate = new Date();
@@ -174,18 +272,21 @@ const FormDetailsPage = () => {
         return new Date(currentDate.getTime() + 5 * 24 * 60 * 60 * 1000); // 5 days later
       case "Spam":
         return new Date(currentDate.getTime() + 2 * 24 * 60 * 60 * 1000); // 2 days later
-      // Add cases for other statuses
+      case "Not interested":
+        return new Date(currentDate.getTime() + 1 * 24 * 60 * 60 * 1000); // 1 days later
+      case "Waiting funds":
+        return new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days later
       default:
         return currentDate;
     }
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col min-h-screen md:flex-row">
       <Navbar />
-      <div className="flex-1 p-5 bg-firstColor">
+      <div className="flex-1 p-4 bg-firstColor">
         <div className="container mx-auto p-6 bg-firstColor shadow-md rounded-md">
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left side: Form and Tasks */}
             <div>
               {/* Form Details */}
@@ -273,12 +374,12 @@ const FormDetailsPage = () => {
                         <p className="text-lg text-eightColor">Assigned To:</p>
                       </div>
                       <p className="text-lg  rounded-md p-2 ">
-                        {formDetails.assigned_to || "No information"}
+                        {getUserEmailById(formDetails.assigned_to)}
                       </p>
                     </div>
                     <div className="mb-2">
                       <button
-                        className="bg-forthColor hover:bg-eightColor text-white font-bold py-2 px-4 rounded"
+                        className="bg-forthColor hover:bg-eightColor text-white font-bold py-2 px-4 rounded w-full"
                         onClick={handleAddTaskClick}
                       >
                         Add Task
@@ -289,7 +390,7 @@ const FormDetailsPage = () => {
               </div>
 
               {/* Tasks */}
-              <div className="bg-forthColor p-4 rounded-md shadow-md">
+              <div className="bg-firstColor p-4 rounded-md shadow-lg shadow-forthColor">
                 <h2 className="text-lg font-semibold mb-4">Tasks</h2>
                 <TasksList tasks={tasks} />
               </div>
@@ -323,21 +424,24 @@ const FormDetailsPage = () => {
       {/* Add Task modal */}
       {showAddTaskModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-md shadow-md">
+          <div className="rounded-md shadow-md shadow-white">
             <button
               className="absolute top-0 right-0 m-4 text-lg text-gray-500"
               onClick={() => setShowAddTaskModal(false)}
             >
               &#x2715;
             </button>
-            <AddTaskPage leadID={id} />
+            <AddTaskPage leadID={id} onClose={closeAddTaskModal} />
           </div>
         </div>
       )}
       {/* Status Modal */}
       {showStatusModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-firstColor p-6 rounded-md shadow-md">
+          <div
+            className="bg-firstColor p-6 rounded-md shadow-md"
+            ref={modalRef}
+          >
             <h2 className="text-lg font-semibold mb-4">Select New Status</h2>
             {/* List of status options */}
             <div className="flex flex-col gap-2">
