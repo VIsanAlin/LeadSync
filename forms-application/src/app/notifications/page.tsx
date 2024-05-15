@@ -141,23 +141,25 @@ const NotificationPage = () => {
             {currentNotifications.map((notification) => (
               <li
                 key={notification.id}
-                className="flex items-center rounded-lg shadow-md shadow-forthColor p-4 mb-4 cursor-pointer"
+                className="w-full  flex items-center rounded-lg shadow-md shadow-forthColor p-4 mb-4 cursor-pointer"
               >
                 {/* Information */}
-                <div className="flex items-center">
+                <div className="w-full flex flex-col space-y-2">
                   {/* Title */}
-                  <div className="mr-3">
+                  <div className=" flex mr-3 justify-between">
                     <p className="text-lg font-semibold">
                       {notification.title}
                     </p>
+                    <p className="text-lg ">
+                      {formatDate(notification.end_date)}
+                    </p>
+                  </div>
+
+                  <div>
+                    {" "}
                     <p className="text-sm ">{notification.description}</p>
                   </div>
                   {/* End Date */}
-                  <div>
-                    <p className="text-sm ">
-                      End Date: {formatDate(notification.end_date)}
-                    </p>
-                  </div>
                 </div>
               </li>
             ))}

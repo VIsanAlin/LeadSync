@@ -42,6 +42,7 @@ interface Note {
 }
 interface User {
   id: string;
+  user_id: string;
   role: string;
   name: string;
   phone: string;
@@ -74,8 +75,8 @@ const FormDetailsPage = () => {
 
   useEffect(() => {
     // Function to close the modal when clicking outside
-    const handleOutsideClick = (event: any) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (modalRef.current && event.target !== modalRef.current) {
         setShowStatusModal(false);
       }
     };

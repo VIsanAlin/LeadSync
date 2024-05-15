@@ -41,19 +41,21 @@ const TasksList: React.FC<TasksListProps> = ({ tasks }) => {
               key={task.id}
               className="bg-secondColor text-eightColor rounded-xl mb-4 p-4 shadow-md"
             >
-              <h3 className="text-lg font-semibold">{task.name}</h3>
-              <p className="text-eightColor">{task.description}</p>
-              <p className="text-eightColor">
-                <strong>Due Date:</strong>{" "}
-                {task.due_date
-                  ? new Date(task.due_date).toLocaleDateString()
-                  : "N/A"}
-              </p>
-              <p className="text-eightColor">
-                <strong>Status:</strong> {task.status}
-              </p>
+              <div className="flex justify-between mb-2">
+                <h3 className="text-sm md:text-lg font-semibold">
+                  {task.name}
+                </h3>
+                <p className="text-sm md:text-lg  text-eightColor">
+                  {task.due_date
+                    ? new Date(task.due_date).toLocaleDateString()
+                    : "N/A"}
+                </p>
+              </div>
+              <div className="text-eightColor mb-3">
+                <p className="text-eightColor ">{task.description}</p>
+              </div>
               {/* WhatsApp and Copy buttons with icons */}
-              <div className="flex space-x-2">
+              <div className="flex justify-center space-x-2 mb-2">
                 <button
                   onClick={() =>
                     handleWhatsAppClick(task.phoneNumber, task.name)

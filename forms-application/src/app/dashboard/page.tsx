@@ -23,6 +23,7 @@ interface Form {
 }
 interface User {
   id: string;
+  user_id: string;
   role: string;
   name: string;
   phone: string;
@@ -181,6 +182,7 @@ const DashboardPage = () => {
   };
   const getUserEmailById = (userId: string) => {
     const user = usersRole.find((user) => user.user_id === userId);
+
     // Return the user's email if found, otherwise return an empty string
     return user ? user.email : "";
   };
@@ -193,7 +195,7 @@ const DashboardPage = () => {
     } else {
       // Otherwise, filter projects based on selected status
       setStatusFilter(status);
-      filterProjects(status);
+      filterProjects(status ?? "");
     }
   };
 
@@ -272,7 +274,7 @@ const DashboardPage = () => {
       onClick={() => setShowAddProject(true)} // Toggle the modal display
       style={{ height: "2.5rem" }} // Set height to match dropdown
     >
-      Add Lead
+      Add Form
     </button>
   );
 
@@ -284,11 +286,11 @@ const DashboardPage = () => {
     >
       <input
         type="checkbox"
-        className="form-checkbox h-5 w-5 text-blue-600"
+        className="h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
         checked={showUnassignedOnly}
         onChange={handleUnasignedChange}
       />
-      <span className="ml-2 text-gray-700">Unassigned Only</span>
+      <span className="ml-2 text-eightColor">Unassigned Only</span>
     </label>
   );
 
@@ -301,7 +303,7 @@ const DashboardPage = () => {
     >
       <option value="">Select User</option>
       {usersRole.map((user) => (
-        <option key={user.id} value={user.id}>
+        <option key={user.user_id} value={user.id}>
           {user.email}
         </option>
       ))}
@@ -337,6 +339,20 @@ const DashboardPage = () => {
     <div className="flex flex-col min-h-screen md:flex-row">
       <Navbar />
       <div className="flex-1 p-4 bg-firstColor text-eightColor">
+        <div className="mb-5 flex justify-between">
+          <div className="mb-5">
+            <h1 className="text-xl font-bold">Dashboard</h1>
+            <h2 className="text-lg font-semibold">Here Are Your Forms</h2>
+          </div>
+          <div className="flex flex-col">
+            <div className="mb-2 text-right">
+              <h3 className="text-xl font-bold">Agent</h3>
+              <p className="text-lg">
+                {getUserEmailById(localStorage.getItem("userId") ?? "")}
+              </p>
+            </div>
+          </div>
+        </div>
         <div className="mb-5 flex ">
           <div className="bg-firstColor p-2 rounded-md shadow-md shadow-forthColor mr-5">
             <h2 className="text-lg font-semibold">Active Forms</h2>
@@ -373,7 +389,7 @@ const DashboardPage = () => {
 
         {/* Project list */}
         <div>
-          <h2 className="text-lg font-semibold mb-3">Projects</h2>
+          <h2 className="text-lg font-semibold mb-3">List with all Forms</h2>
           <ul>
             {currentForms.map((form) => (
               <li

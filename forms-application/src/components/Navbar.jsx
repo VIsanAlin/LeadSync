@@ -101,26 +101,48 @@ export default function Navbar() {
             <FiMenu />
           </button>
           {showMenu && (
-            <div className="flex flex-col space-y-4">
-              <Link href="/dashboard" className="text-eightColor">
-                Dashboard
+            <div className="flex flex-col  space-y-4">
+              <Link
+                href="/dashboard"
+                className="flex space-x-2  items-center text-eightColor"
+              >
+                <FiHome />
+                <p>Dashboard</p>
               </Link>
-              <Link href="/tasks" className="text-eightColor">
-                Tasks
+              <Link
+                href="/tasks"
+                className="flex space-x-2 items-center text-eightColor"
+              >
+                <FiCheckSquare />
+                <p>Tasks</p>
               </Link>
-              <Link href="/notifications" className="text-eightColor">
-                Notifications
+              <Link
+                href="/notifications"
+                className="flex space-x-2  items-center text-eightColor"
+              >
+                <FiBell />
+                <p>Notifications</p>
+
                 {notificationCount > 0 && (
                   <span className="bg-eightColor text-forthColor rounded-full px-2 py-1 ml-2">
                     {notificationCount}
                   </span>
                 )}
               </Link>
-              <Link href="/profile" className="text-eightColor">
-                Profile
+              <Link
+                href="/profile"
+                className="flex space-x-2  items-center text-eightColor"
+              >
+                <FiUser />
+                <p>Profile</p>
               </Link>
-              <Link onClick={handleLogout} href="/" className="text-eightColor">
-                Log-out
+              <Link
+                onClick={handleLogout}
+                href="/"
+                className="flex space-x-2  items-center text-eightColor"
+              >
+                <FiLogOut />
+                <p>Log-out</p>
               </Link>
             </div>
           )}

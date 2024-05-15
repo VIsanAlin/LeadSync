@@ -29,6 +29,7 @@ const TaskPage = () => {
   const id = parts[parts.length - 1];
 
   const [task, setTask] = useState<Task | null>(null);
+  const [description, setDescription] = useState("");
   const [notes, setNotes] = useState<Note[]>([]);
 
   useEffect(() => {
@@ -56,7 +57,7 @@ const TaskPage = () => {
   const fetchNotes = async (taskId: string) => {
     try {
       const { data, error } = await supabase
-        .from("task_notes")
+        .from("tasks_notes")
         .select()
         .eq("task_id", taskId);
       if (error) throw error;
@@ -64,6 +65,20 @@ const TaskPage = () => {
     } catch (error: any) {
       console.error("Error fetching notes:", error.message);
     }
+  };
+
+  const handleAddNote = async () => {
+    if (!description) return; // Don't add empty notes
+
+    await supabase.from("tasks_notes").insert({
+      task_id: id,
+      description: description,
+      created_by: localStorage.getItem("userId"),
+      created_at: new Date(),
+    });
+
+    // Clear the description field after adding the note
+    setDescription("");
   };
 
   const handleWhatsAppClick = () => {
@@ -100,66 +115,67 @@ const TaskPage = () => {
   return (
     <div className="flex flex-col min-h-screen md:flex-row">
       <Navbar />
-      <div className="flex-1 p-5 bg-firstColor">
+      <div className="flex-1 p-4 bg-firstColor">
         <div className="container mx-auto p-6 bg-firstColor shadow-md rounded-md">
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-col-2 gap-6">
             {/* Left side: Task Details */}
-            <div>
-              <h2 className="text-lg font-semibold mb-4">Task Details</h2>
+            <div className="bg-firstColor p-4 rounded-md mb-6">
+              <h2 className="text-2xl font-bold mb-4">Task Details</h2>
               {task ? (
-                <div className="bg-forthColor p-4 rounded-md mb-6">
-                  <div className="flex mb-2">
-                    <div className="bg-coloreight rounded-md p-2">
+                <div className="mt-4">
+                  <div className="flex flex-col mb-2">
+                    <div className="bg-coloreight rounded-md ">
                       <p className="text-lg text-eightColor">Name:</p>
                     </div>
-                    <p className="text-lg rounded-md p-2 ">
+                    <p className="text-lg rounded-md  ">
                       {task.name || "No information"}
                     </p>
                   </div>
                   <div className="flex mb-2">
-                    <div className="bg-coloreight rounded-md p-2">
+                    <div className="bg-coloreight rounded-md ">
+                      <p className="text-lg text-eightColor">Status:</p>
+                    </div>
+                    <p className="text-lg rounded-md  ml-2">
+                      {task.status || "No information"}
+                    </p>
+                  </div>
+                  <div className="flex flex-col mb-2">
+                    <div className="bg-coloreight rounded-md ">
                       <p className="text-lg text-eightColor">Description:</p>
                     </div>
-                    <p className="text-lg rounded-md p-2 ">
+                    <p className="text-lg rounded-md ">
                       {task.description || "No information"}
                     </p>
                   </div>
                   <div className="flex mb-2">
-                    <div className="bg-coloreight rounded-md p-2">
+                    <div className="bg-coloreight rounded-md ">
                       <p className="text-lg text-eightColor">Created At:</p>
                     </div>
-                    <p className="text-lg rounded-md p-2 ">
+                    <p className="text-lg rounded-md  ml-2">
                       {task.created_at
                         ? new Date(task.created_at).toLocaleString()
                         : "No information"}
                     </p>
                   </div>
                   <div className="flex mb-2">
-                    <div className="bg-coloreight rounded-md p-2">
+                    <div className="bg-coloreight rounded-md ">
                       <p className="text-lg text-eightColor">Due Date:</p>
                     </div>
-                    <p className="text-lg rounded-md p-2 ">
+                    <p className="text-lg rounded-md  ml-2">
                       {task.due_date
                         ? new Date(task.due_date).toLocaleString()
                         : "No information"}
                     </p>
                   </div>
                   <div className="flex mb-2">
-                    <div className="bg-coloreight rounded-md p-2">
+                    <div className="bg-coloreight rounded-md ">
                       <p className="text-lg text-eightColor">Assigned To:</p>
                     </div>
-                    <p className="text-lg rounded-md p-2 ">
+                    <p className="text-lg rounded-md ml-2">
                       {task.assigned_to || "No information"}
                     </p>
                   </div>
-                  <div className="flex mb-2">
-                    <div className="bg-coloreight rounded-md p-2">
-                      <p className="text-lg text-eightColor">Status:</p>
-                    </div>
-                    <p className="text-lg rounded-md p-2 ">
-                      {task.status || "No information"}
-                    </p>
-                  </div>
+
                   {/* WhatsApp and Copy buttons with icons */}
                   <div className="flex space-x-2">
                     <button
@@ -184,9 +200,25 @@ const TaskPage = () => {
             </div>
             {/* Right side: Notes */}
             <div>
-              <div className="bg-forthColor p-4 rounded-md shadow-md">
-                <h2 className="text-lg font-semibold mb-4">Notes</h2>
+              <div className="p-4 rounded-md shadow-xl shadow-forthColor">
+                <h2 className="text-lg font-semibold mb-4 ml-2">Notes</h2>
                 <NotesComponent notes={notes} />
+                <div className="flex p-4 max-h-24">
+                  {/* Input field for description */}
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Enter note description..."
+                    className="w-full p-2  rounded-md shadow-inner shadow-forthColor bg-secondColor text-eightColor mr-4"
+                  />
+                  {/* Button to add new note */}
+                  <button
+                    onClick={handleAddNote}
+                    className="bg-forthColor text-white  px-4 rounded hover:bg-eightColor hover:text-forthColor"
+                  >
+                    Add Note
+                  </button>
+                </div>
               </div>
             </div>
           </div>
