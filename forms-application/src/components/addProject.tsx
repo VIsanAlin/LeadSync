@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabase";
-
-const AddProjectForm = ({ onCancel }) => {
+type CancelFunction = (event: React.MouseEvent<HTMLButtonElement>) => void;
+const AddProjectForm = ({ onCancel }: { onCancel: CancelFunction }) => {
   const [lastId, setLastId] = useState<number | null>(null);
   const [newProjectData, setNewProjectData] = useState({
     id: 0,

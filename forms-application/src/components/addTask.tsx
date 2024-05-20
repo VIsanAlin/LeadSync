@@ -13,7 +13,7 @@ const AddTaskPage = ({ leadID, onClose }: AddTaskPageProps) => {
   const [status, setStatus] = useState("");
   const [assignedTo, setAssignedTo] = useState(""); // Assuming this is a user ID or name
 
-  const formRef = useRef(null);
+  const formRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     // Function to close the modal when clicking outside the form
     const handleOutsideClick = (event: any) => {
