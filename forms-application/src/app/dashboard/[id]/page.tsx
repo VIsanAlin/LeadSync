@@ -32,6 +32,7 @@ interface Task {
   created_by: string;
   due_date: Date;
   assigned_to: string;
+  phoneNumber: string;
 }
 interface Note {
   id: string;
@@ -92,7 +93,12 @@ const FormDetailsPage = () => {
     };
   }, [showStatusModal]);
 
-  console.log(selectedStatus);
+  useEffect(() => {
+    if (formDetails) {
+      fetchTasks(formDetails.id);
+    }
+  }, [formDetails]);
+
   const fetchFormDetails = async (formId: string) => {
     try {
       const { data, error } = await supabase
@@ -102,6 +108,8 @@ const FormDetailsPage = () => {
         .single();
       if (error) throw error;
       setFormDetails(data);
+
+      // Move fetchTasks and fetchNotes here
     } catch (error: any) {
       console.error("Error fetching form details:", error.message);
     }
@@ -115,7 +123,11 @@ const FormDetailsPage = () => {
         .eq("project_id", formId); // Use 'project_id' instead of 'id'
 
       if (error) throw error;
-      setTasks(data);
+      const tasksWithPhone = data.map((task: Task) => ({
+        ...task,
+        phoneNumber: formDetails?.phone || "", // Add phone number from formDetails
+      }));
+      setTasks(tasksWithPhone);
     } catch (error: any) {
       console.error("Error fetching tasks:", error.message);
     }
@@ -146,7 +158,6 @@ const FormDetailsPage = () => {
       }
 
       setUsersRole(data || []);
-      console.log(data);
     } catch (error: any) {
       console.error("Error fetching users with role 3:", error.message);
     }

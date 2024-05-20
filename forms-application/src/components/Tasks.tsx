@@ -9,6 +9,7 @@ interface Task {
   created_at: Date;
   due_date: Date;
   assigned_to: string;
+  phoneNumber: string;
 }
 
 interface TasksListProps {
@@ -21,7 +22,7 @@ const TasksList: React.FC<TasksListProps> = ({ tasks }) => {
       `Buna ziua, v-am trimis pe email informațiile necesare pentru a putea accesa fonduri pentru proiectul dumneavoastra.`
     );
     window.open(
-      `https://api.whatsapp.com/send/?phone=40727819985&text=${encodedMessage}&type=phone_number&app_absent=0`,
+      `https://api.whatsapp.com/send/?phone=${phoneNumber}&text=${encodedMessage}&type=phone_number&app_absent=0`,
       "_blank"
     );
   };
@@ -30,7 +31,6 @@ const TasksList: React.FC<TasksListProps> = ({ tasks }) => {
     navigator.clipboard.writeText(text);
   };
 
-  // Check if tasks is an array
   // Check if tasks is an array
   if (Array.isArray(tasks)) {
     return (

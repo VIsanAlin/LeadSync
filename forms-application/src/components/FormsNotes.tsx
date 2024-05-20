@@ -55,15 +55,13 @@ const NotesComponent: React.FC<NotesComponentProps> = ({ notes }) => {
       }
 
       setUsersRole(data || []);
-      console.log(data);
     } catch (error: any) {
       console.error("Error fetching users with role 3:", error.message);
     }
   };
   const getUserEmailById = (userId: string) => {
     const user = usersRole.find((user) => user.user_id === userId);
-    console.log(user);
-    console.log(usersRole);
+
     // Return the user's email if found, otherwise return an empty string
     return user ? user.email : "";
   };
