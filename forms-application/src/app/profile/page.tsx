@@ -10,7 +10,6 @@ interface User {
   role?: string;
   email?: string;
   email_confirmed_at?: string;
-  // Add other properties as needed
 }
 
 interface UserData {
@@ -18,7 +17,6 @@ interface UserData {
   name: string; // Assuming you have a 'name' field in your users_ext table
   email: string; // Assuming you have an 'email' field in your users_ext table
   phoneNumber: string; // Assuming you have a 'phonenumber' field in your users_ext table
-  // Add other properties as needed
 }
 
 const ProfilePage = () => {
@@ -97,9 +95,9 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col min-h-screen md:flex-row">
       <Navbar />
-      <div className="flex-1 p-5 bg-firstColor">
+      <div className="flex-1 p-5 bg-firstColor text-eightColor">
         <div className="container mx-auto p-6 bg-firstColor shadow-md rounded-md">
           <h2 className="text-lg font-semibold mb-4">Profile</h2>
           {error ? (
