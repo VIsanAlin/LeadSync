@@ -348,7 +348,8 @@ const DashboardPage = () => {
             <div className="mb-2 text-right">
               <h3 className="text-xl font-bold">Agent</h3>
               <p className="text-lg">
-                {getUserEmailById(localStorage.getItem("userId") ?? "")}
+                {typeof window !== "undefined" &&
+                  getUserEmailById(localStorage.getItem("userId") ?? "")}
               </p>
             </div>
           </div>
